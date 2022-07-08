@@ -99,9 +99,17 @@ grep "hor" t2t_cenAnnotation.v2.021921.bed | grep -v "dhor" > t2t_cenAnnotation.
 bedtools intersect -abam /scratch/mira/chm13.CHM13_v1.1.bam -b /data/mira/CDR_detect/data/t2t_cenAnnotation.v2.021921.genbank_chrnames.bed -wa > /scratch/mira/chm13.CHM13_v1.1.hor.bam
 ```
 
-Download and run pb-cpg tools on it
+Download and run pb-cpg tools on it to get methylation calls per site
 ```
-
+conda activate cpg
+python /Users/miramastoras/Desktop/Miga_lab/pb-CpG-tools/aligned_bam_to_cpg_scores.py -b /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/chm13.CHM13_v1.1.hor.bam -f /Users/miramastoras/Desktop/IGV_files/HG002_t2t_chrX.fa -o /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg -p model -d /Users/miramastoras/Desktop/Miga_lab/pb-CpG-tools/pileup_calling_model/ -m reference
+```
+Smooth results into 1000 bp windows
+```
+# make windows
+python3 /Users/miramastoras/Desktop/Miga_lab/CDR_detect/scripts/make_bed_windows.py -b /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.bed -s 1000
+# smooth cpg in windows
+bedtools map -a /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.bed_windows1000.bed -b /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.bed -c 4 -o mean > /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.smoothed1000.bedgraph
 ```
 
 ## 2. Benchmark CDR_detect performance across CHM13 and HG002 t2t-X
