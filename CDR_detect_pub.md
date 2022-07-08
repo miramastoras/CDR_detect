@@ -102,7 +102,7 @@ bedtools intersect -abam /scratch/mira/chm13.CHM13_v1.1.bam -b /data/mira/CDR_de
 Download and run pb-cpg tools on it to get methylation calls per site
 ```
 conda activate cpg
-python /Users/miramastoras/Desktop/Miga_lab/pb-CpG-tools/aligned_bam_to_cpg_scores.py -b /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/chm13.CHM13_v1.1.hor.bam -f /Users/miramastoras/Desktop/IGV_files/HG002_t2t_chrX.fa -o /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg -p model -d /Users/miramastoras/Desktop/Miga_lab/pb-CpG-tools/pileup_calling_model/ -m reference
+python /Users/miramastoras/Desktop/Miga_lab/pb-CpG-tools/aligned_bam_to_cpg_scores.py -b /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/chm13.CHM13_v1.1.hor.bam -f /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/GCA_009914755.4_T2T-CHM13v2.0_genomic.fna -o /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg -p model -d /Users/miramastoras/Desktop/Miga_lab/pb-CpG-tools/pileup_calling_model/ -m reference
 ```
 Smooth results into 1000 bp windows
 ```
@@ -117,3 +117,5 @@ bedtools map -a /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.
 ## 3. Run CDR_detect across HPRC individuals hifi data
 
 ## 4. Expand CDR_detect to ONT data
+
+time docker run -it -v /data:/data -v /data2:/data2 jmcdani20/hap.py:v0.3.12 rm -rf /data/mira/hprc_polishing/HG002/output/pepper_deepvariant_output/pepper_snp
