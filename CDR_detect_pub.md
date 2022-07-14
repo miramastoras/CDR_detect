@@ -75,21 +75,50 @@ In looking to create a quantitative definition of a CDR, I tested several option
 
 They vary between using 500 bp windows and 1000 bp windows, merging adjacent windows or windows separated by 500 or 1000 bp, and setting a minimum window size after merging (no minimum, 1000 and 1500)
 
-For my large CDR definition, I've chosen 1000 bp windows, merging adjacent windows <50% methylated and a minimum CDR size of 1500 bp
+For my strict CDR definition, I've chosen 1000 bp windows, merging adjacent windows <50% methylated and a minimum CDR size of 1500 bp
 
-for my small CDR definition, I've chosen 1000 bp windows, merging adjacent windows <50% methylated and a minimum CDR size of 1500 bp
+for my small CDR definition, I've chosen to define a CDR  as any >1000 bp windows where the methylation drops below 50%, merging windows that are within 1 window of each other (1000bp)
 
-#### 1.2A Looking at dips in CHM13
+#### 1.2A Commands for generating small and large CDR definitions
+
+Run pb-cpg-tools to get probability of base modification at every CpG site using all the reads
+```
+conda activate cpg
+python /Users/miramastoras/Desktop/Miga_lab/pb-CpG-tools/aligned_bam_to_cpg_scores.py -b /Users/miramastoras/Desktop/IGV_files/S3CXH1L.hg002_t2tX.srt.bam -f /Users/miramastoras/Desktop/IGV_files/HG002_t2t_chrX.fa -o /Users/miramastoras/Desktop/Miga_lab/S3CXHL/S3CXH1L.hg002_t2tX.pb_cpg -p model -d /Users/miramastoras/Desktop/Miga_lab/pb-CpG-tools/pileup_calling_model/ -m reference
+```
+Get windows from bedfile with custom script
+```
+python3 /Users/miramastoras/Desktop/Miga_lab/CDR_detect/scripts/make_bed_windows.py -b /Users/miramastoras/Desktop/Miga_lab/S3CXHL/S3CXH1L.hg002_t2tX.pb_cpg.combined.reference.bed -s 1000
+```
+Use bedtools map to get smoothed methylation calls for the windows
+```
+bedtools map -a S3CXH1L.hg002_t2tX.pb_cpg.combined.reference.bed_windows1000.bed -b S3CXH1L.hg002_t2tX.pb_cpg.combined.reference.bed -c 4 -o mean > S3CXH1L.hg002_t2tX.pb_cpg.combined.reference.smoothed_1000.bed
+```
+
+Get all windows < 50% methylated, merge adjacent windows, and choose size based on strict or lenient CDRs
+```
+awk '$4 < 50' S3CXH1L.hg002_t2tX.pb_cpg.combined.reference.smoothed_1000.bed | bedtools merge -i stdin | awk -v OFS='\t' '{if ($3-$2 > 2000) {print $1,$2,$3}}' > S3CXH1L.hg002_t2tX.strictCDR.bed
+
+awk '$4 < 50' S3CXH1L.hg002_t2tX.pb_cpg.combined.reference.smoothed_1000.bed | bedtools merge -i stdin -d 1000 > S3CXH1L.hg002_t2tX.lenCDR.bed
+```
+
+#### 1.2B Looking at dips in CHM13
 
 fix chrom names in chm13 primrose bamfile.
 Key located here: https://www.ncbi.nlm.nih.gov/assembly/GCA_009914755.3
 
+chrom_names to genbank :
 ```
 grep -v "^#" GCA_009914755.3_T2T-CHM13v1.1_assembly_report.txt | cut -f1,5 | awk '{print "sed -e " "\s/chr"$1"/"$2"/"}'
 
 cat t2t_cenAnnotation.v2.021921.bed | sed -e 's/chr1/CP068277.2/' | sed -e 's/chr2/CP068276.2/' | sed -e 's/chr3/CP068275.2/' | sed -e 's/chr4/CP068274.2/' | sed -e 's/chr5/CP068273.2/' | sed -e 's/chr6/CP068272.2/' | sed -e 's/chr7/CP068271.2/' | sed -e 's/chr8/CP068270.2/' | sed -e 's/chr9/CP068269.2/' | sed -e 's/chr10/CP068268.2/' | sed -e 's/chr11/CP068267.2/' | sed -e 's/chr12/CP068266.2/' | sed -e 's/chr13/CP068265.2/' | sed -e 's/chr14/CP068264.2/' | sed -e 's/chr15/CP068263.2/' | sed -e 's/chr16/CP068262.2/' | sed -e 's/chr17/CP068261.2/' | sed -e 's/chr18/CP068260.2/' | sed -e 's/chr19/CP068259.2/' | sed -e 's/chr20/CP068258.2/' | sed -e 's/chr21/CP068257.2/' | sed -e 's/chr22/CP068256.2/' | sed -e 's/chrX/CP068255.2/' | sed -e 's/MT/CP068254.1/' > t2t_cenAnnotation.v2.021921.genbank_chrnames.bed
 ```
+genbank -> chrom names
+```
+grep -v "^#" GCA_009914755.3_T2T-CHM13v1.1_assembly_report.txt | cut -f1,5 | awk '{print "sed -e " "\s/"$2"/chr"$1"/"}'
 
+cat /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.smoothed1000.bedgraph | sed -e 's/CP068277.2/chr1/' | sed -e 's/CP068276.2/chr2/' | sed -e 's/CP068275.2/chr3/' | sed -e 's/CP068274.2/chr4/' | sed -e 's/CP068273.2/chr5/' | sed -e 's/CP068272.2/chr6/' | sed -e 's/CP068271.2/chr7/' | sed -e 's/CP068270.2/chr8/' | sed -e 's/CP068269.2/chr9/' | sed -e 's/CP068268.2/chr10/' | sed -e 's/CP068267.2/chr11/' | sed -e 's/CP068266.2/chr12/' | sed -e 's/CP068265.2/chr13/' | sed -e 's/CP068264.2/chr14/' | sed -e 's/CP068263.2/chr15/' | sed -e 's/CP068262.2/chr16/' | sed -e 's/CP068261.2/chr17/' | sed -e 's/CP068260.2/chr18/' | sed -e 's/CP068259.2/chr19/' | sed -e 's/CP068258.2/chr20/' | sed -e 's/CP068257.2/chr21/' | sed -e 's/CP068256.2/chr22/' | sed -e 's/CP068255.2/chrX/' | sed -e 's/CP068254.1/MT/'
+```
 
 Pull out alpha arrays from [chm13-chm13v1.1 primrose](https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=submissions/a211382e-938f-4aa2-8424-1db8fc75a0cd--CHM13-HIFI-METHYLATION-CHM13v1.1/) (on wakanda)
 
@@ -109,12 +138,84 @@ Smooth results into 1000 bp windows
 # make windows
 python3 /Users/miramastoras/Desktop/Miga_lab/CDR_detect/scripts/make_bed_windows.py -b /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.bed -s 1000
 # smooth cpg in windows
-bedtools map -a /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.bed_windows1000.bed -b /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.bed -c 4 -o mean > /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.smoothed1000.bedgraph
+bedtools map -a /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.bed_windows1000.srt.bed -b /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.bed -c 4 -o mean > /Users/miramastoras/Desktop/Miga_lab/CHM13_hor/CHM13v1.1.pb_cpg.combined.reference.smoothed1000.bedgraph
 ```
 
-## 2. Benchmark CDR_detect performance across CHM13 and HG002 t2t-X
+CHM13 has a lower level of methylation than is normal, and will therefore require different parameters than normal cell lines, so we can't use it to benchmark actually.
+
+## 2. Benchmark CDR_detect performance in HG002 t2t-X
+
+### 2.1 Description of CDR_detect.py
+
+### 2.2 Testing best parameters on strict and lenient CDR definition
+
 
 ## 3. Run CDR_detect across HPRC individuals hifi data
+
+HOR boundaries annotations for every individual:
+https://storage.googleapis.com/masri/hprc/hprc_hors.tar.gz
+AS HOR - monomer level
+https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=submissions/08934468-0AE3-42B6-814A-C5422311A53D--HUMAS_HMMER/
+
+Hifi alignments located here in  `read alignment diploid`
+https://app.terra.bio/#workspaces/human-pangenome-ucsc/coverage_GenBank/data
+
+primrose data (unaligned) here:
+https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=submissions/560047a6-6d16-4b0c-aac9-7d0c83e2188e--HIFI-METHYLATION-READS/
+
+### 3.1 First pass: HG001243, HG005, HG02055
+
+Use secphase to correct read alignments
+```
+
+docker run -it \
+-v /scratch/mira:/scratch/mira \
+-v /scratch/mira:/scratch/mira \
+-v /public:/public \
+-u `id -u`:`id -g` --ipc host \
+mobinasri/secphase:v0.1 \
+correct_bam \
+-i /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.bam \
+-p /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.correctbam.log \
+-o /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.bam \
+--primaryOnly --threads 32
+```
+Pull out the alpha satelites HOR (at the monomer level of annotation from HUMAS_HMMER)
+Get list of readnames
+```
+cat AS-HOR-vs-HG005-paternal.bed AS-HOR-vs-HG005-maternal.bed > AS-HOR-vs-HG005-dip.bed
+bedtools sort -i AS-HOR-vs-HG005-dip.bed > AS-HOR-vs-HG005-dip.srt.bed
+
+bedtools intersect -abam /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.bam -b /scratch/mira/AS-HOR-vs-HG005-dip.srt.bed -wa > /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam
+samtools index /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam
+
+rm /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.bam
+rm /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.bam
+rm AS-HOR-vs-HG005-paternal.bed AS-HOR-vs-HG005-maternal.bed
+
+samtools view /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam | cut -f1 > /scratch/mira/HG005_hifi_AS-HOR_readnames.txt
+```
+
+Pull out these readnames from the primrose data. First need to map the primrose reads so we can pull out read names with pysam (or else we would need to use fgrep which is too slow)
+```
+conda activate CDR-detect
+ls *bam | while read line ; do echo $line ; done >> HG005.fofn
+pbmm2 align /data/mira/reference/GCA_000001405.15_GRCh38_no_alt_analysis_set.header.fa HG005.fofn HG005.hifi_reads_hg38.bam
+python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.bam -n /scratch/mira/HG005_hifi_AS-HOR_readnames.txt -o /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.bam
+```
+
+run CDR detect on the primrose data
+```
+samtools sort /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.bam > /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.srt.bam
+samtools index /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.srt.bam
+
+python3 /public/home/miramastoras/progs/scripts/CDR_detect.py -b /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.srt.bam -o /data/mira/CDR_detect/results/HG005.hifi
+```
+
+subset original hifi aligned bam with CDR readnames, sent to karen
+```
+
+```
 
 ## 4. Expand CDR_detect to ONT data
 
