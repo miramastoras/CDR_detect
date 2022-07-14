@@ -212,9 +212,13 @@ samtools index /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.srt.bam
 python3 /public/home/miramastoras/progs/scripts/CDR_detect.py -b /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.srt.bam -o /data/mira/CDR_detect/results/HG005.hifi
 ```
 
-subset original hifi aligned bam with CDR readnames, sent to karen
+subset original hifi aligned bam with CDR readnames
 ```
+python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam -n /data/mira/CDR_detect/results/HG005.hifi_CDR.txt -o /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.bam
 
+samtools sort /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.bam > /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam
+samtools index /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam
+samtools view /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam | cut -f1-4 
 ```
 
 ## 4. Expand CDR_detect to ONT data
