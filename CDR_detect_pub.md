@@ -167,7 +167,7 @@ https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=submissio
 
 Use secphase to correct read alignments
 ```
-
+# HG005
 docker run -it \
 -v /scratch/mira:/scratch/mira \
 -v /scratch/mira:/scratch/mira \
@@ -179,29 +179,73 @@ correct_bam \
 -p /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.correctbam.log \
 -o /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.bam \
 --primaryOnly --threads 32
+
+# HG01243
+docker run -it \
+-v /scratch/mira:/scratch/mira \
+-v /scratch/mira:/scratch/mira \
+-v /public:/public \
+-u `id -u`:`id -g` --ipc host \
+mobinasri/secphase:v0.1 \
+correct_bam \
+-i /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.bam \
+-p /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.correctbam.log \
+-o /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.bam \
+--primaryOnly --threads 32
+
+# HG02055
+docker run -it \
+-v /scratch/mira:/scratch/mira \
+-v /scratch/mira:/scratch/mira \
+-v /public:/public \
+-u `id -u`:`id -g` --ipc host \
+mobinasri/secphase:v0.1 \
+correct_bam \
+-i /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.bam \
+-p /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.correctbam.log \
+-o /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.bam \
+--primaryOnly --threads 32
 ```
 Pull out the alpha satelites HOR (at the monomer level of annotation from HUMAS_HMMER)
 Get list of readnames
 ```
 cat AS-HOR-vs-HG005-paternal.bed AS-HOR-vs-HG005-maternal.bed > AS-HOR-vs-HG005-dip.bed
+cat AS-HOR-vs-HG01243-paternal.bed AS-HOR-vs-HG01243-maternal.bed > AS-HOR-vs-HG01243-dip.bed
+cat AS-HOR-vs-HG02055-paternal.bed AS-HOR-vs-HG02055-maternal.bed > AS-HOR-vs-HG02055-dip.bed
 bedtools sort -i AS-HOR-vs-HG005-dip.bed > AS-HOR-vs-HG005-dip.srt.bed
+bedtools sort -i AS-HOR-vs-HG01243-dip.bed > AS-HOR-vs-HG01243-dip.srt.bed
+bedtools sort -i AS-HOR-vs-HG02055-dip.bed > AS-HOR-vs-HG02055-dip.srt.bed
 
-bedtools intersect -abam /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.bam -b /scratch/mira/AS-HOR-vs-HG005-dip.srt.bed -wa > /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam
-samtools index /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam
+bedtools intersect -abam /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.bam  -b /scratch/mira/AS-HOR-vs-HG01243-dip.srt.bed -wa > /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam
+samtools index /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam
+
+bedtools intersect -abam /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.bam  -b /scratch/mira/AS-HOR-vs-HG02055-dip.srt.bed -wa > /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam
+samtools index /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam
+
 
 rm /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.bam
 rm /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.bam
 rm AS-HOR-vs-HG005-paternal.bed AS-HOR-vs-HG005-maternal.bed
 
 samtools view /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam | cut -f1 > /scratch/mira/HG005_hifi_AS-HOR_readnames.txt
+samtools view /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam | cut -f1 > /scratch/mira/HG01243_hifi_AS-HOR_readnames.txt
+samtools view /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam | cut -f1 > /scratch/mira/HG02055_hifi_AS-HOR_readnames.txt
+
+
 ```
 
 Pull out these readnames from the primrose data. First need to map the primrose reads so we can pull out read names with pysam (or else we would need to use fgrep which is too slow)
 ```
 conda activate CDR-detect
 ls *bam | while read line ; do echo $line ; done >> HG005.fofn
+pbmm2 align /data/mira/reference/GCA_000001405.15_GRCh38_no_alt_analysis_set.header.fa HG01243.fofn HG01243.hifi_reads_hg38.bam
 pbmm2 align /data/mira/reference/GCA_000001405.15_GRCh38_no_alt_analysis_set.header.fa HG005.fofn HG005.hifi_reads_hg38.bam
+pbmm2 align /data/mira/reference/GCA_000001405.15_GRCh38_no_alt_analysis_set.header.fa HG02055.fofn HG02055.hifi_reads_hg38.bam
 python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.bam -n /scratch/mira/HG005_hifi_AS-HOR_readnames.txt -o /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.bam
+
+python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG01243_primrose/HG01243.hifi_reads_hg38.bam -n /scratch/mira/HG01243_hifi_AS-HOR_readnames.txt -o /scratch/mira/HG01243_primrose/HG01243.hifi_reads_hg38.AS-HOR.bam
+
+python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG02055_primrose/HG02055.hifi_reads_hg38.bam -n /scratch/mira/HG02055_hifi_AS-HOR_readnames.txt -o /scratch/mira/HG02055_primrose/HG02055.hifi_reads_hg38.AS-HOR.bam
 ```
 
 run CDR detect on the primrose data
@@ -210,15 +254,21 @@ samtools sort /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.bam > /s
 samtools index /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.srt.bam
 
 python3 /public/home/miramastoras/progs/scripts/CDR_detect.py -b /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.srt.bam -o /data/mira/CDR_detect/results/HG005.hifi
+python3 /public/home/miramastoras/progs/scripts/CDR_detect.py -b /scratch/mira/HG01243_primrose/HG01243.hifi_reads_hg38.AS-HOR.srt.bam -o /data/mira/CDR_detect/results/HG01243.hifi
+python3 /public/home/miramastoras/progs/scripts/CDR_detect.py -b /scratch/mira/HG02055_primrose/HG02055.hifi_reads_hg38.AS-HOR.srt.bam -o /data/mira/CDR_detect/results/HG02055.hifi
 ```
 
 subset original hifi aligned bam with CDR readnames
 ```
 python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam -n /data/mira/CDR_detect/results/HG005.hifi_CDR.txt -o /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.bam
 
+python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam -n /data/mira/CDR_detect/results/HG02055.hifi_CDR.txt -o /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.bam
+
+python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam -n /data/mira/CDR_detect/results/HG01243.hifi_CDR.txt -o /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.bam
+
 samtools sort /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.bam > /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam
 samtools index /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam
-samtools view /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam | cut -f1-4 
+samtools view /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam | cut -f1-4
 ```
 
 ## 4. Expand CDR_detect to ONT data
