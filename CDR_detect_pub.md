@@ -265,11 +265,34 @@ python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mir
 python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam -n /data/mira/CDR_detect/results/HG02055.hifi_CDR.txt -o /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.bam
 
 python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam -n /data/mira/CDR_detect/results/HG01243.hifi_CDR.txt -o /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.bam
-
+```
+Associate read with array
+Get text file with read name, contig, start coord, read length
+```
 samtools sort /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.bam > /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam
 samtools index /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam
-samtools view /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam | cut -f1-4
+
+samtools view /scratch/mira/HG005.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam | awk '{print $3"\t"$4"\t"$4+length($10)"\t"$1}' > HG005_hifi_diploid_CDRreads.bed
+echo "#contig read_start read_end read_id HUMAS_HMMER_annotation" > /data/mira/CDR_detect/results/HG005_diploid_CDR_reads_HUMAS_HMMER_annotations.txt
+bedtools map -a test.bed -b /scratch/mira/AS-HOR-vs-HG005-dip.srt.bed -c 4 -o collapse >> /data/mira/CDR_detect/results/HG005_hifi_diploid_CDRreads_HUMAS_HMMER_annotations.txt
+
+samtools view /scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam | awk '{print $3"\t"$4"\t"$4+length($10)"\t"$1}' > HG01243_hifi_diploid_CDRreads.bed
+echo "#contig read_start read_end read_id HUMAS_HMMER_annotation" > /data/mira/CDR_detect/results/HG01243_diploid_CDR_reads_HUMAS_HMMER_annotations.txt
+bedtools map -a test.bed -b /scratch/mira/AS-HOR-vs-HG01243-dip.srt.bed -c 4 -o collapse >> /data/mira/CDR_detect/results/HG01243_hifi_diploid_CDRreads_HUMAS_HMMER_annotations.txt
+
+samtools view /scratch/mira/HG02055.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.CDRs.srt.bam | awk '{print $3"\t"$4"\t"$4+length($10)"\t"$1}' > HG02055_hifi_diploid_CDRreads.bed
+echo "#contig read_start read_end read_id HUMAS_HMMER_annotation" > /data/mira/CDR_detect/results/HG02055_diploid_CDR_reads_HUMAS_HMMER_annotations.txt
+bedtools map -a test.bed -b /scratch/mira/AS-HOR-vs-HG02055-dip.srt.bed -c 4 -o collapse >> /data/mira/CDR_detect/results/HG02055_hifi_diploid_CDRreads_HUMAS_HMMER_annotations.txt
 ```
+Subset primrose bam with CDR detect reads to get fastq sequences for them
+```
+python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.srt.bam -n /data/mira/CDR_detect/results/HG005.hifi_CDR.txt -o /scratch/mira/HG005_primrose/HG005.hifi_reads_hg38.AS-HOR.CDRs.bam
+
+python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG01243_primrose/HG01243.hifi_reads_hg38.AS-HOR.srt.bam -n /data/mira/CDR_detect/results/HG01243.hifi_CDR.txt -o /scratch/mira/HG01243_primrose/HG01243.hifi_reads_hg38.AS-HOR.CDRs.bam
+
+python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b /scratch/mira/HG02055_primrose/HG02055.hifi_reads_hg38.AS-HOR.srt.bam -n /data/mira/CDR_detect/results/HG02055.hifi_CDR.txt -o /scratch/mira/HG02055_primrose/HG02055.hifi_reads_hg38.AS-HOR.CDRs.bam
+```
+
 
 ## 4. Expand CDR_detect to ONT data
 
