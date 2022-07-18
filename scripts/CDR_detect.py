@@ -33,6 +33,22 @@ def arg_parser():
                         required=True,
                         metavar="output text file prefix",
                         help="prefix for output list of CDR read names and non CDR read names")
+    parser.add_argument("-w", "--windowsize",
+                        required=False,
+                        metavar="windowsize in bp",
+                        help="Windowsize in bp on each read to consider smoothed methylation percentage")
+    parser.add_argument("-x", "--window_threshold",
+                        required=False,
+                        metavar="methylation threshold to call CDR in a window",
+                        help="Percentage methylation below which to call a window containing a CDR")
+    parser.add_argument("-t", "--read_threshold",
+                        required=False,
+                        metavar="read length average methylation threshold to call CDR",
+                        help="Percentage methylation below which to call a read containing a CDR")
+    parser.add_argument("-i", "--step_size",
+                        required=False,
+                        metavar="read length average methylation threshold to call CDR",
+                        help="Percentage methylation below which to call a read containing a CDR")
 
     return parser.parse_args()
 
@@ -227,11 +243,21 @@ def main():
     bamfile = pysam.AlignmentFile(args.bam, "rb")
     bamfile.fetch()
 
-    # define parameters (later switch to command line)
-    w=1500 # windowsize in bp
+    # define default parameters
+    w= 1500 # windowsize in bp
     x = 0.5 # threshold for methylation in sliding window
     t = 0.4 # threshold to automatically call a CDR across the whole read
     o = 1 # number bp to move sliding window over by
+
+    # use command line parameters if they are provided
+    if args.windowsize is not None:
+        w=int(args.windowsize)
+    if args.window_threshold is not None:
+        x=float(args.window_threshold)
+    if args.read_threshold is not None:
+        t=float(args.read_threshold)
+    if args.step_size is not None:
+        o=int(args.step_size)
     # separate cdr candidates from noncdr candidates
     CDRs,nonCDRs =find_cdr_candidates(bamfile, w, x, o, t)
 
