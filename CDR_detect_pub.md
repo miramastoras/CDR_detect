@@ -163,6 +163,8 @@ https://app.terra.bio/#workspaces/human-pangenome-ucsc/coverage_GenBank/data
 primrose data (unaligned) here:
 https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=submissions/560047a6-6d16-4b0c-aac9-7d0c83e2188e--HIFI-METHYLATION-READS/
 
+script for extracting reads: https://github.com/timoast/ngs-tools/blob/master/extract_reads.py
+
 ### 3.1 First pass: HG001243, HG005, HG02055
 
 Use secphase to correct read alignments

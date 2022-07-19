@@ -56,6 +56,7 @@ task getHORReadnames{
         File patHORBed
         File secPhaseHifiBam
         String sampleName
+        String dockerImage
     }
     command <<<
         set -o pipefail
@@ -81,6 +82,7 @@ task getHORReadnames{
 
 task mapPrimrose{
     input{
+    Array [File] # brackets, comma delimited list of strings
     }
     command <<<
         set -o pipefail
