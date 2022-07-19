@@ -298,6 +298,34 @@ bedtools bamtofastq -i /scratch/mira/HG02055_primrose/HG02055.hifi_reads_hg38.AS
 bedtools bamtofastq -i /scratch/mira/HG01243_primrose/HG01243.hifi_reads_hg38.AS-HOR.CDRs.bam -fq /scratch/mira/HG01243_primrose/HG01243_diploid_hifi_CDRreads.fastq
 ```
 
+### 3.2 wdl workflow for 3.1
+
+```
+input files:
+- primrose bamfiles
+- corrected hifi to assembly alignments
+- hummer annotation bedfile
+- assemblies
+
+workspace files:
+- hg38
+
+tasks:
+- pull out alpha satelites from corrected hifi assembly aligned bam, get their readnames
+- map primrose to hg38 with pbmm2
+- pull out HORs using readnames file from primrose data using script
+- run CDR detect on primrose data
+- subset  primrose bam with CDR readnames and get fastq sequences for them
+- subset hifi bam with cdr names to get txt file
+
+Docker reqs:
+- pysam
+- CDR_detect.py
+- extract_reads.py
+- pbmm2
+- samtools
+- bedtools
+```
 
 ## 4. Expand CDR_detect to ONT data
 

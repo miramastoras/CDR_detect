@@ -1,14 +1,53 @@
 version 1.0
 
 workflow runCDRdetect{
-    input{}
-    call getHORReadnames{}
+    input{
+        File matHORBed
+        File patHORBed
+        File secPhaseHifiBam
+        String sampleName
+        # hifi ccs bams
+    }
+    call getHORReadnames{
+        input:
+            matHORBed=matHORBed
+            patHORBed=patHORBed
+            secPhaseHifiBam=secPhaseHifiBam
+            sampleName=sampleName
+    }
     call mapPrimrose{}
-    call getHORPrimrose{}
-    call CDRdetect{}
-    call getCDRfastq{}
-    call getCDRLocations{}
-    output{}
+    call getHORPrimrose{
+        input{
+            mappedPrimroseBam=mapPrimrose.mappedPrimroseBam
+            sampleName=sampleName
+            HORHifiBamReadnames=getHORReadnames.HORHifiBamReadnames
+        }
+    }
+    call CDRdetect{
+        input{
+            HORPrimroseBam=getHORPrimrose.HORPrimroseBam
+            sampleName=sampleName
+        }
+    }
+    call getCDRfastq{
+        input{
+            HORPrimroseBam=getHORPrimrose.HORPrimroseBam
+            CDRReadnames=CDRdetect.CDRReadnames
+            sampleName=sampleName
+        }
+    }
+    call getCDRLocations{
+        input{
+            hifiBam=secPhaseHifiBam
+            CDRReadnames=CDRdetect.CDRReadnames
+            sampleName=sampleName
+            dipHORBed=getHORReadnames.dipHORBed
+        }
+    }
+    output{
+        File CDRfastq=getCDRfastq.CDRfastq
+        File CDRannotations=getCDRLocations.CDRannotations
+    }
 }
 
 task getHORReadnames{
@@ -30,8 +69,13 @@ task getHORReadnames{
     >>>
     output{
         File dipHORBed = "~{sampleName}_AS_HOR_dip.srt.bed"
-        File HORHifiBam = "~{sampleName}_hifi_diploid_HOR.bam"
         File HORHifiBamReadnames = "~{sampleName}_hifi_diploid_HOR.readnames.txt"
+    }
+    runtime {
+        memory: memSizeGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskSizeGb + " SSD"
+        docker: dockerImage
     }
 }
 
@@ -49,12 +93,18 @@ task mapPrimrose{
     output{
        File mappedPrimroseBam = "~{sampleName}_hifi_primrose_hg38.bam"
     }
+    runtime {
+        memory: memSizeGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskSizeGb + " SSD"
+        docker: dockerImage
+    }
 }
 
 task getHORPrimrose{
     input{
         File mappedPrimroseBam
-        string SampleName
+        String SampleName
         File HORHifiBamReadnames
     }
     command <<<
@@ -71,16 +121,22 @@ task getHORPrimrose{
         File HORPrimroseBam = "~{sampleName}_hifi_primrose_hg38_HOR.srt.bam"
         File HORPrimroseBai = "~{sampleName}_hifi_primrose_hg38_HOR.srt.bam.bai"
     }
+    runtime {
+        memory: memSizeGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskSizeGb + " SSD"
+        docker: dockerImage
+    }
 }
 
 task CDRdetect{
     input{
         File HORPrimroseBam
         String sampleName
-        String windowSize
-        String windowThresh
-        String readThresh
-        String stepSize
+        String windowSize=1500
+        String windowThresh=0.5
+        String readThresh=0.4
+        String stepSize=1
     }
     command <<<
         set -o pipefail
@@ -93,11 +149,17 @@ task CDRdetect{
     output{
         File CDRReadnames="~{sampleName}_CDR_readnames.txt"
     }
+    runtime {
+        memory: memSizeGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskSizeGb + " SSD"
+        docker: dockerImage
+    }
 }
 
 task getCDRLocations{
     input{
-        File HORHifiBam
+        File hifiBam
         File CDRReadnames
         String sampleName
         File dipHORBed
@@ -119,13 +181,19 @@ task getCDRLocations{
     output{
         File CDRannotations = "~{sampleName}_hifi_diploid_CDRreads_HUMAS_HMMER_annotations.txt"
     }
+    runtime {
+        memory: memSizeGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskSizeGb + " SSD"
+        docker: dockerImage
+    }
 }
 
 task getCDRfastq{
     input{
         File HORPrimroseBam
         File CDRReadnames
-        String {sampleName}
+        String sampleName
     }
     command <<<
         python3 extract_reads.py -b ~{HORPrimroseBam} -n ~{CDRReadnames} -o ~{sampleName}_primrose_CDRs.bam
@@ -134,5 +202,11 @@ task getCDRfastq{
     >>>
     output{
         File CDRfastq="~{sampleName}_CDRs.fastq.gz"
+    }
+    runtime {
+        memory: memSizeGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskSizeGb + " SSD"
+        docker: dockerImage
     }
 }
