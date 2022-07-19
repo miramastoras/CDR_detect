@@ -8,42 +8,45 @@ workflow runCDRdetect{
         String sampleName
         # hifi ccs bams
     }
+
     call getHORReadnames{
         input:
-            matHORBed=matHORBed
-            patHORBed=patHORBed
-            secPhaseHifiBam=secPhaseHifiBam
+            matHORBed=matHORBed,
+            patHORBed=patHORBed,
+            secPhaseHifiBam=secPhaseHifiBam,
             sampleName=sampleName
     }
+
     call mapPrimrose{}
+
     call getHORPrimrose{
-        input{
-            mappedPrimroseBam=mapPrimrose.mappedPrimroseBam
-            sampleName=sampleName
+        input:
+            mappedPrimroseBam=mapPrimrose.mappedPrimroseBam,
+            sampleName=sampleName,
             HORHifiBamReadnames=getHORReadnames.HORHifiBamReadnames
-        }
     }
+
     call CDRdetect{
-        input{
-            HORPrimroseBam=getHORPrimrose.HORPrimroseBam
+        input:
+            HORPrimroseBam=getHORPrimrose.HORPrimroseBam,
             sampleName=sampleName
-        }
     }
+
     call getCDRfastq{
-        input{
-            HORPrimroseBam=getHORPrimrose.HORPrimroseBam
-            CDRReadnames=CDRdetect.CDRReadnames
+        input:
+            HORPrimroseBam=getHORPrimrose.HORPrimroseBam,
+            CDRReadnames=CDRdetect.CDRReadnames,
             sampleName=sampleName
-        }
     }
+
     call getCDRLocations{
-        input{
-            hifiBam=secPhaseHifiBam
-            CDRReadnames=CDRdetect.CDRReadnames
-            sampleName=sampleName
+        input:
+            hifiBam=secPhaseHifiBam,
+            CDRReadnames=CDRdetect.CDRReadnames,
+            sampleName=sampleName,
             dipHORBed=getHORReadnames.dipHORBed
-        }
     }
+
     output{
         File CDRfastq=getCDRfastq.CDRfastq
         File CDRannotations=getCDRLocations.CDRannotations
@@ -56,7 +59,11 @@ task getHORReadnames{
         File patHORBed
         File secPhaseHifiBam
         String sampleName
-        String dockerImage
+
+        String dockerImage = "mira_blah:latest"
+        Int memSizeGB = 24
+        Int threads = 2
+        Int diskSizeGB = 128
     }
     command <<<
         set -o pipefail
@@ -73,16 +80,21 @@ task getHORReadnames{
         File HORHifiBamReadnames = "~{sampleName}_hifi_diploid_HOR.readnames.txt"
     }
     runtime {
-        memory: memSizeGb + " GB"
+        memory: memSizeGB + " GB"
         cpu: threads
-        disks: "local-disk " + diskSizeGb + " SSD"
+        disks: "local-disk " + diskSizeGB + " SSD"
         docker: dockerImage
     }
 }
 
 task mapPrimrose{
     input{
-    Array [File] # brackets, comma delimited list of strings
+        Array[File] inputBam # brackets, comma delimited list of strings
+
+        String dockerImage = "mira_blah:latest"
+        Int memSizeGB = 24
+        Int threads = 2
+        Int diskSizeGB = 128
     }
     command <<<
         set -o pipefail
@@ -96,9 +108,9 @@ task mapPrimrose{
        File mappedPrimroseBam = "~{sampleName}_hifi_primrose_hg38.bam"
     }
     runtime {
-        memory: memSizeGb + " GB"
+        memory: memSizeGB + " GB"
         cpu: threads
-        disks: "local-disk " + diskSizeGb + " SSD"
+        disks: "local-disk " + diskSizeGB + " SSD"
         docker: dockerImage
     }
 }
@@ -106,8 +118,13 @@ task mapPrimrose{
 task getHORPrimrose{
     input{
         File mappedPrimroseBam
-        String SampleName
+        String sampleName
         File HORHifiBamReadnames
+
+        String dockerImage = "mira_blah:latest"
+        Int memSizeGB = 24
+        Int threads = 2
+        Int diskSizeGB = 128
     }
     command <<<
         set -o pipefail
@@ -124,9 +141,9 @@ task getHORPrimrose{
         File HORPrimroseBai = "~{sampleName}_hifi_primrose_hg38_HOR.srt.bam.bai"
     }
     runtime {
-        memory: memSizeGb + " GB"
+        memory: memSizeGB + " GB"
         cpu: threads
-        disks: "local-disk " + diskSizeGb + " SSD"
+        disks: "local-disk " + diskSizeGB + " SSD"
         docker: dockerImage
     }
 }
@@ -135,10 +152,16 @@ task CDRdetect{
     input{
         File HORPrimroseBam
         String sampleName
+
         String windowSize=1500
         String windowThresh=0.5
         String readThresh=0.4
         String stepSize=1
+
+        String dockerImage = "mira_blah:latest"
+        Int memSizeGB = 24
+        Int threads = 2
+        Int diskSizeGB = 128
     }
     command <<<
         set -o pipefail
@@ -152,9 +175,9 @@ task CDRdetect{
         File CDRReadnames="~{sampleName}_CDR_readnames.txt"
     }
     runtime {
-        memory: memSizeGb + " GB"
+        memory: memSizeGB + " GB"
         cpu: threads
-        disks: "local-disk " + diskSizeGb + " SSD"
+        disks: "local-disk " + diskSizeGB + " SSD"
         docker: dockerImage
     }
 }
@@ -165,6 +188,11 @@ task getCDRLocations{
         File CDRReadnames
         String sampleName
         File dipHORBed
+
+        String dockerImage = "mira_blah:latest"
+        Int memSizeGB = 24
+        Int threads = 2
+        Int diskSizeGB = 128
     }
     command <<<
         set -o pipefail
@@ -184,9 +212,9 @@ task getCDRLocations{
         File CDRannotations = "~{sampleName}_hifi_diploid_CDRreads_HUMAS_HMMER_annotations.txt"
     }
     runtime {
-        memory: memSizeGb + " GB"
+        memory: memSizeGB + " GB"
         cpu: threads
-        disks: "local-disk " + diskSizeGb + " SSD"
+        disks: "local-disk " + diskSizeGB + " SSD"
         docker: dockerImage
     }
 }
@@ -196,6 +224,11 @@ task getCDRfastq{
         File HORPrimroseBam
         File CDRReadnames
         String sampleName
+
+        String dockerImage = "mira_blah:latest"
+        Int memSizeGB = 24
+        Int threads = 2
+        Int diskSizeGB = 128
     }
     command <<<
         python3 extract_reads.py -b ~{HORPrimroseBam} -n ~{CDRReadnames} -o ~{sampleName}_primrose_CDRs.bam
@@ -206,9 +239,9 @@ task getCDRfastq{
         File CDRfastq="~{sampleName}_CDRs.fastq.gz"
     }
     runtime {
-        memory: memSizeGb + " GB"
+        memory: memSizeGB + " GB"
         cpu: threads
-        disks: "local-disk " + diskSizeGb + " SSD"
+        disks: "local-disk " + diskSizeGB + " SSD"
         docker: dockerImage
     }
 }
