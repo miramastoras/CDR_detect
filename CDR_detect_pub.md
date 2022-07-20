@@ -329,6 +329,40 @@ Docker reqs:
 - bedtools
 ```
 
-## 4. Expand CDR_detect to ONT data
+Testing fgrep instead to subset bam
+```
+time samtools cat m64017_200723_190224.hifi_reads.bam m64017_200730_190124.hifi_reads.bam m64017_200801_011415.hifi_reads.bam m64017_200802_073944.hifi_reads.bam -o HG005_primrose.bam
 
-time docker run -it -v /data:/data -v /data2:/data2 jmcdani20/hap.py:v0.3.12 rm -rf /data/mira/hprc_polishing/HG002/output/pepper_deepvariant_output/pepper_snp
+real    11m52.698s
+user    0m2.856s
+sys     0m50.919s
+
+time samtools view -H HG005_primrose.bam > HG005_HORs.bam # 0s
+time samtools view HG005_primrose.bam | fgrep -w -f /scratch/mira/HG005_hifi_AS-HOR_readnames.txt >> HG005_HORs.bam
+
+ls *bam | while read line ; do echo $line ; done >> HG005.fofn
+time pbmm2 align /data/mira/reference/GCA_000001405.15_GRCh38_no_alt_analysis_set.header.fa HG005.fofn HG005.hifi_reads_hg38.bam
+real    49m5.840s
+user    2590m7.326s
+sys     24m57.544s
+time python3 /public/home/miramastoras/progs/scripts/extract_reads.py -b HG005.hifi_reads_hg38.bam -n /scratch/mira/HG005_hifi_AS-HOR_readnames.txt -o HG005.hifi_reads_hg38.AS-HOR.testmap.bam # 13 mins
+
+java -jar /public/home/miramastoras/progs/picard.jar AddOrReplaceReadGroups I=/scratch/mira/HG005_primrose/HG005_primrose.bam \
+        O=/scratch/mira/HG005_primrose/HG005_primrose.rg.bam
+
+time samtools view -H /scratch/mira/HG005_primrose/HG005_primrose.bam | grep -v "^@RG" | samtools reheader - /scratch/mira/HG005_primrose/HG005_primrose.bam > /scratch/mira/HG005_primrose/HG005_primrose.reheader.bam
+
+time java -jar /public/home/miramastoras/progs/picard.jar FilterSamReads \
+       I=/scratch/mira/HG005_primrose/HG005_primrose.bam \
+       O=/scratch/mira/HG005_primrose/HG005.primrose.AS-HOR.picardtest.bam \
+       READ_LIST_FILE=/scratch/mira/HG005_hifi_AS-HOR_readnames.txt FILTER=includeReadList
+```
+
+testing docker
+```
+docker run \
+    -i \
+    -t ubuntu:18.04 \
+    /bin/bash
+```
+## 4. Expand CDR_detect to ONT data
