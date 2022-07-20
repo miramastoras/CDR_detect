@@ -6,7 +6,7 @@ workflow runCDRdetect{
         File patHORBed
         File secPhaseHifiBam
         String sampleName
-        File[Array] primroseBams
+        Array[File] primroseBams
     }
 
     call getHORReads{
