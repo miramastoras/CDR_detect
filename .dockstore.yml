@@ -1,0 +1,5 @@
+version: 1.2
+workflows:
+   -  name: CDR_detect
+      subclass: WDL
+      primaryDescriptorPath: /scripts/CDR_detect.wdl
