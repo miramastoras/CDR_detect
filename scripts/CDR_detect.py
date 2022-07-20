@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
+
 '''
 Purpose: Determine whether reads contain a potential CDR
 Author: Mira Mastoras, mmastora@ucsc.edu
 Usage: python3 CDR_detect.py -b bamfile -o outfile_prefix
 '''
-#!/usr/bin/env python3
+
 
 import argparse
 import pysam
