@@ -11,12 +11,11 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN apt-get update \
-  && apt-get install -y python3-pip python3-dev awscli jq pigz \
+  && apt-get install -y python3-pip python3-dev jq pigz \
   && cd /usr/local/bin \
   && ln -s /usr/bin/python3 python \
   && pip3 --no-cache-dir install --upgrade pip \
-  && rm -rf /var/lib/apt/lists/* \
-  && python -m pip install --upgrade awscli
+  && rm -rf /var/lib/apt/lists/*
 
 RUN python -m pip install pandas pysam biopython numpy argparse
 
@@ -43,7 +42,6 @@ RUN apt-get update -y && apt-get install -y \
     wget \
     curl \
     zlib1g-dev \
-    python \
     python-pip \
     libbz2-dev \
     liblzma-dev
@@ -57,11 +55,11 @@ WORKDIR /usr/local/bin/bedtools2-${bedtools_version}
 RUN make
 RUN ln -s /usr/local/bin/bedtools2-${bedtools_version}/bin/bedtools /usr/local/bin/bedtools
 
-# install scripts
-WORKDIR /opt/
-RUN git clone https://github.com/timoast/ngs-tools
-RUN ln -s extract_reads.py /usr/local/bin/extract_reads.py
-RUN git clone https://github.com/miramastoras/CDR_detect
-RUN ln -s scripts/CDR_detect.py /usr/local/bin/CDR_detect.py
+# install CDR detect
+WORKDIR /opt
+RUN git clone https://github.com/miramastoras/CDR_detect && \
+    cd CDR_detect/scripts && \
+    chmod +x CDR_detect.py &&
+ENV PATH="/opt/CDR_detect/scripts/:${PATH}"
 
 WORKDIR /data
