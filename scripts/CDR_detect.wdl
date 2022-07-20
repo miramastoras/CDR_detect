@@ -26,11 +26,11 @@ workflow runCDRdetect{
 
     call formatResults{
         input:
-            primroseHORBam=getHORPrimrose.primroseHORBam,
+            primroseHORBam=getHORReads.primroseHORBam,
             CDRReadnames=CDRdetect.CDRReadnames,
             sampleName=sampleName,
-            hifiBam=secPhaseHifiBam,
-            dipHORBed=getHORReadnames.dipHORBed
+            hifiBam=getHORReads.dipHORBam,
+            dipHORBed=getHORReads.dipHORBed
     }
 
     output{
