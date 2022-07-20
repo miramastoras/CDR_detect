@@ -16,6 +16,7 @@ workflow runCDRdetect{
             secPhaseHifiBam=secPhaseHifiBam,
             sampleName=sampleName,
             primroseBams=primroseBams
+    }
 
     call CDRdetect{
         input:
