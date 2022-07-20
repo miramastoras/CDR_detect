@@ -357,7 +357,10 @@ time java -jar /public/home/miramastoras/progs/picard.jar FilterSamReads \
        O=/scratch/mira/HG005_primrose/HG005.primrose.AS-HOR.picardtest.bam \
        READ_LIST_FILE=/scratch/mira/HG005_hifi_AS-HOR_readnames.txt FILTER=includeReadList
 ```
-
+Validate wdl with womtool
+```
+java -jar /public/home/miramastoras/progs/womtool-72.jar validate /data/mira/CDR_detect/test/CDR_detect/scripts/CDR_detect.wdl
+```
 testing docker
 ```
 docker run \

@@ -29,7 +29,7 @@ workflow runCDRdetect{
             primroseHORBam=getHORReads.primroseHORBam,
             CDRReadnames=CDRdetect.CDRReadnames,
             sampleName=sampleName,
-            hifiBam=getHORReads.dipHORBam,
+            hifiBam=getHORReads.hifiHORBam,
             dipHORBed=getHORReads.dipHORBed
     }
 
