@@ -2,12 +2,8 @@
 Purpose: Determine whether reads contain a potential CDR
 Author: Mira Mastoras, mmastora@ucsc.edu
 Usage: python3 CDR_detect.py -b bamfile -o outfile_prefix
-
-python3 CDR_detect.py -w 0.1 -j 100 -x 0.1 -b /Users/miramastoras/Desktop/Miga_lab/S3CXHL/S3CXH1L.hg002_t2tX.nonCDR.srt.bam -o /Users/miramastoras/Desktop/Miga_lab/S3CXHL/test2
-
-python3 CDR_detect.py -b /Users/miramastoras/Desktop/Miga_lab/S3CXHL/S3CXH1L.hg002_t2tX.nonCDR.0.04.CDR.merge.srt.bam -o /Users/miramastoras/Desktop/Miga_lab/S3CXHL/merge_test1
-
 '''
+#!/usr/bin/env python3
 
 import argparse
 import pysam
