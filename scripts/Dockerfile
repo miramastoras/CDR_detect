@@ -59,7 +59,7 @@ RUN ln -s /usr/local/bin/bedtools2-${bedtools_version}/bin/bedtools /usr/local/b
 WORKDIR /opt
 RUN git clone https://github.com/miramastoras/CDR_detect && \
     cd CDR_detect/scripts && \
-    chmod +x CDR_detect.py &&
+    chmod +x CDR_detect.py
 ENV PATH="/opt/CDR_detect/scripts/:${PATH}"
 
 WORKDIR /data
