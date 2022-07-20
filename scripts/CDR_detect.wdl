@@ -14,7 +14,7 @@ workflow runCDRdetect{
             matHORBed=matHORBed,
             patHORBed=patHORBed,
             secPhaseHifiBam=secPhaseHifiBam,
-            sampleName=sampleName
+            sampleName=sampleName,
             primroseBams=primroseBams
 
     call CDRdetect{
@@ -27,7 +27,7 @@ workflow runCDRdetect{
         input:
             primroseHORBam=getHORPrimrose.primroseHORBam,
             CDRReadnames=CDRdetect.CDRReadnames,
-            sampleName=sampleName
+            sampleName=sampleName,
             hifiBam=secPhaseHifiBam,
             dipHORBed=getHORReadnames.dipHORBed
     }
