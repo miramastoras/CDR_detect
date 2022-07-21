@@ -66,7 +66,7 @@ task getHORReads{
 
         # pull HOR readnames from primrose data
 
-        samtools cat ~{primroseBams} -o ~{sampleName}_hifi_primrose.bam
+        samtools cat ~{sep(" ", ~{primroseBams})} -o ~{sampleName}_hifi_primrose.bam
         samtools view -H ~{sampleName}_hifi_primrose.bam > ~{sampleName}_hifi_primrose_HOR.bam
         samtools view ~{sampleName}_hifi_primrose.bam | fgrep -w -f ~{sampleName}_HOR.readnames.txt >> ~{sampleName}_hifi_primrose_HOR.bam
 
