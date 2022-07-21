@@ -61,8 +61,8 @@ task getHORReads{
         # get list of readnames mapping to HOR bedfiles in the diploid assemblies
         cat ~{matHORBed} ~{patHORBed} | bedtools sort -i stdin > ~{sampleName}_AS_HOR_dip.srt.bed
         bedtools intersect -abam ~{secPhaseHifiBam} -b ~{sampleName}_AS_HOR_dip.srt.bed -wa > ~{sampleName}_hifi_diploid_HOR.bam
-        samtools sort ~{hifiHORBam}
-        samtools view ~{sampleName}_hifi_diploid_HOR.bam | cut -f1 > ~{sampleName}_HOR.readnames.txt
+        samtools sort ~{sampleName}_hifi_diploid_HOR.bam > ~{sampleName}_hifi_diploid_HOR.srt.bam
+        samtools view ~{sampleName}_hifi_diploid_HOR.srt.bam | cut -f1 > ~{sampleName}_HOR.readnames.txt
 
         # pull HOR readnames from primrose data
 
@@ -76,7 +76,7 @@ task getHORReads{
     >>>
     output{
         File dipHORBed = "~{sampleName}_AS_HOR_dip.srt.bed"
-        File hifiHORBam = "~{sampleName}_hifi_diploid_HOR.bam"
+        File hifiHORBam = "~{sampleName}_hifi_diploid_HOR.srt.bam"
         File primroseHORBam = "~{sampleName}_hifi_primrose_HOR.srt.bam"
         File primroseHORBai = "~{sampleName}_hifi_primrose_HOR.srt.bam.bai"
     }
