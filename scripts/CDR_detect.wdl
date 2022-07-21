@@ -65,6 +65,7 @@ task getHORReads{
         samtools view ~{sampleName}_hifi_diploid_HOR.bam | cut -f1 > ~{sampleName}_HOR.readnames.txt
 
         # pull HOR readnames from primrose data
+
         samtools cat ~{primroseBams} -o ~{sampleName}_hifi_primrose.bam
         samtools view -H ~{sampleName}_hifi_primrose.bam > ~{sampleName}_hifi_primrose_HOR.bam
         samtools view ~{sampleName}_hifi_primrose.bam | fgrep -w -f ~{sampleName}_HOR.readnames.txt >> ~{sampleName}_hifi_primrose_HOR.bam
@@ -91,8 +92,8 @@ task CDRdetect{
         File primroseHORBam
         String sampleName
 
-        String windowSize=1500
-        String windowThresh=0.5
+        String windowSize=3000
+        String windowThresh=0.3
         String readThresh=0.4
         String stepSize=1
 

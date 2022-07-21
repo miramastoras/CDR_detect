@@ -242,8 +242,8 @@ def main():
     bamfile.fetch()
 
     # define default parameters
-    w= 1500 # windowsize in bp
-    x = 0.5 # threshold for methylation in sliding window
+    w= 3000 # windowsize in bp
+    x = 0.3 # threshold for methylation in sliding window
     t = 0.4 # threshold to automatically call a CDR across the whole read
     o = 1 # number bp to move sliding window over by
 
