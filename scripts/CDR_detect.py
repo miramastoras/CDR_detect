@@ -238,7 +238,7 @@ def main():
     args = arg_parser()
 
     # open bam file
-    bamfile = pysam.AlignmentFile(args.bam, "rb")
+    bamfile = pysam.AlignmentFile(args.bam, "rb",check_sq=False)
     bamfile.fetch()
 
     # define default parameters

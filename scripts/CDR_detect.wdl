@@ -61,17 +61,17 @@ task getHORReads{
         # get list of readnames mapping to HOR bedfiles in the diploid assemblies
         cat ~{matHORBed} ~{patHORBed} | bedtools sort -i stdin > ~{sampleName}_AS_HOR_dip.srt.bed
         bedtools intersect -abam ~{secPhaseHifiBam} -b ~{sampleName}_AS_HOR_dip.srt.bed -wa > ~{sampleName}_hifi_diploid_HOR.bam
-        samtools sort ~{sampleName}_hifi_diploid_HOR.bam > ~{sampleName}_hifi_diploid_HOR.srt.bam
-        samtools view ~{sampleName}_hifi_diploid_HOR.srt.bam | cut -f1 > ~{sampleName}_HOR.readnames.txt
+        samtools sort --threads ~{threads} ~{sampleName}_hifi_diploid_HOR.bam > ~{sampleName}_hifi_diploid_HOR.srt.bam
+        samtools view --threads ~{threads} ~{sampleName}_hifi_diploid_HOR.srt.bam | cut -f1 > ~{sampleName}_HOR.readnames.txt
 
         # pull HOR readnames from primrose data
 
         samtools cat ~{sep=" " primroseBams} -o ~{sampleName}_hifi_primrose.bam
-        samtools view -H ~{sampleName}_hifi_primrose.bam > ~{sampleName}_hifi_primrose_HOR.bam
-        samtools view ~{sampleName}_hifi_primrose.bam | fgrep -w -f ~{sampleName}_HOR.readnames.txt >> ~{sampleName}_hifi_primrose_HOR.bam
+        samtools view --threads ~{threads} -H ~{sampleName}_hifi_primrose.bam > ~{sampleName}_hifi_primrose_HOR.bam
+        samtools view --threads ~{threads} ~{sampleName}_hifi_primrose.bam | fgrep -w -f ~{sampleName}_HOR.readnames.txt >> ~{sampleName}_hifi_primrose_HOR.bam
 
-        samtools sort ~{sampleName}_hifi_primrose_HOR.bam > ~{sampleName}_hifi_primrose_HOR.srt.bam
-        samtools index ~{sampleName}_hifi_primrose_HOR.srt.bam
+        samtools sort --threads ~{threads} ~{sampleName}_hifi_primrose_HOR.bam > ~{sampleName}_hifi_primrose_HOR.srt.bam
+        samtools index --threads ~{threads} ~{sampleName}_hifi_primrose_HOR.srt.bam
     >>>
     output{
         File dipHORBed = "~{sampleName}_AS_HOR_dip.srt.bed"
@@ -141,15 +141,15 @@ task formatResults{
         set -o xtrace
 
         # get locations & annotations for each read
-        samtools view ~{hifiHORBam} | fgrep -w -f ~{CDRReadnames} >> ~{sampleName}_hifi_CDRs.bam
-        samtools sort ~{sampleName}_hifi_CDRs.bam > ~{sampleName}_hifi_CDRs.srt.bam
-        samtools index ~{sampleName}_hifi_CDRs.srt.bam
+        samtools view --threads ~{threads} ~{hifiHORBam} | fgrep -w -f ~{CDRReadnames} >> ~{sampleName}_hifi_CDRs.bam
+        samtools sort --threads ~{threads} ~{sampleName}_hifi_CDRs.bam > ~{sampleName}_hifi_CDRs.srt.bam
+        samtools index --threads ~{threads} ~{sampleName}_hifi_CDRs.srt.bam
 
-        samtools view ~{sampleName}_hifi_CDRs.srt.bam | awk '{print $3"\t"$4"\t"$4+length($10)"\t"$1}' > ~{sampleName}_hifi_diploid_CDRreads.bed
+        samtools view --threads ~{threads} ~{sampleName}_hifi_CDRs.srt.bam | awk '{print $3"\t"$4"\t"$4+length($10)"\t"$1}' > ~{sampleName}_hifi_diploid_CDRreads.bed
         bedtools map -a ~{sampleName}_hifi_diploid_CDRreads.bed -b ~{dipHORBed} -c 4 -o collapse > ~{sampleName}_hifi_diploid_CDRreads_HUMAS_HMMER_annotations.txt
 
         # get fastq sequence using primrose data
-        samtools view ~{primroseHORBam} | fgrep -w -f ~{CDRReadnames} >> ~{sampleName}_primrose_CDRs.bam
+        samtools view --threads ~{threads} ~{primroseHORBam} | fgrep -w -f ~{CDRReadnames} >> ~{sampleName}_primrose_CDRs.bam
         bedtools bamtofastq -i ~{sampleName}_primrose_CDRs.bam -fq ~{sampleName}_CDRs.fastq
         gzip ~{sampleName}_CDRs.fastq
 

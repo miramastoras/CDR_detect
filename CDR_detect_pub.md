@@ -385,4 +385,12 @@ docker run \
     -t ubuntu:18.04 \
     /bin/bash
 ```
+
+```
+docker run -it -v /scratch/mira:/scratch/mira -v /scratch/mira/cromwell-executions/runCDRdetect/e97ef395-1055-48f3-8aed-82d42893a50c/call-getHORReads/execution:/scratch/mira/cromwell-executions/runCDRdetect/e97ef395-1055-48f3-8aed-82d42893a50c/call-getHORReads/execution miramastoras/cdr_detect:latest CDR_detect.py -b /scratch/mira/cromwell-executions/runCDRdetect/e97ef395-1055-48f3-8aed-82d42893a50c/call-getHORReads/execution/HG01243_hifi_primrose_HOR.bam -o /scratch/mira/test/cdr_detect_test_unsort
+
+/data/mira/CDR_detect/test/CDR_detect/scripts/CDR_detect.py -b /scratch/mira/cromwell-executions/runCDRdetect/e97ef395-1055-48f3-8aed-82d42893a50c/call-getHORReads/execution/HG01243_hifi_primrose_HOR.bam -o /scratch/mira/test/cdr_detect_test_unsort
+
+/data/mira/CDR_detect/test/CDR_detect/scripts/CDR_detect.py -b /scratch/mira/HG01243_primrose/hifi_cat_test.bam -o /scratch/mira/test/cdr_detect_test_unsort
+```
 ## 4. Expand CDR_detect to ONT data
