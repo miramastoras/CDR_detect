@@ -65,7 +65,7 @@ task getHORReads{
         samtools view ~{sampleName}_hifi_diploid_HOR.srt.bam | cut -f1 > ~{sampleName}_HOR.readnames.txt
 
         # pull HOR readnames from primrose data
-        
+
         samtools cat ~{sep=" " primroseBams} -o ~{sampleName}_hifi_primrose.bam
         samtools view -H ~{sampleName}_hifi_primrose.bam > ~{sampleName}_hifi_primrose_HOR.bam
         samtools view ~{sampleName}_hifi_primrose.bam | fgrep -w -f ~{sampleName}_HOR.readnames.txt >> ~{sampleName}_hifi_primrose_HOR.bam
@@ -108,7 +108,7 @@ task CDRdetect{
         set -u
         set -o xtrace
 
-        python3 CDR_detect.py -w ~{windowSize} -t ~{readThresh} -x ~{windowThresh} -i ~{stepSize} -b ~{primroseHORBam} -o ~{sampleName}_CDR_readnames.txt
+        CDR_detect.py -w ~{windowSize} -t ~{readThresh} -x ~{windowThresh} -i ~{stepSize} -b ~{primroseHORBam} -o ~{sampleName}_CDR_readnames.txt
     >>>
     output{
         File CDRReadnames="~{sampleName}_CDR_readnames.txt"
