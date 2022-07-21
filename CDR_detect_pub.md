@@ -360,7 +360,24 @@ time java -jar /public/home/miramastoras/progs/picard.jar FilterSamReads \
 Validate wdl with womtool
 ```
 java -jar /public/home/miramastoras/progs/womtool-72.jar validate /data/mira/CDR_detect/test/CDR_detect/scripts/CDR_detect.wdl
+java -jar /public/home/miramastoras/progs/womtool-72.jar inputs /data/mira/CDR_detect/test/CDR_detect/scripts/CDR_detect.wdl >> HG01243_wdl_inputs.json
 ```
+run wdl on server
+```
+/data/mira/PhaseReads_Eval/scripts/cromwell run /data/mira/CDR_detect/test/CDR_detect/scripts/CDR_detect.wdl -i /data/mira/CDR_detect/HG01243_wdl_inputs.json
+```
+
+```json
+{
+  "runCDRdetect.matHORBed": "/scratch/mira/AS-HOR-vs-HG01243-maternal.bed",
+  "runCDRdetect.patHORBed": "/scratch/mira/AS-HOR-vs-HG01243-paternal.bed",
+  "runCDRdetect.sampleName": "HG01243",
+  "runCDRdetect.primroseBams": ["/scratch/mira/HG01243_primrose/m64136_200827_191603.hifi_reads.bam","/scratch/mira/HG01243_primrose/m64136_200829_012933.hifi_reads.bam","/scratch/mira/HG01243_primrose/m64136_200830_075556.hifi_reads.bam"],
+  "runCDRdetect.secPhaseHifiBam": "/scratch/mira/HG01243.diploid.f1_assembly_v2_genbank.hifi.winnowmap_v2.03.secphase.AS-HOR.bam"
+}
+
+```
+
 testing docker
 ```
 docker run \
