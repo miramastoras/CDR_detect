@@ -1,6 +1,7 @@
 ### Motivation for method
 
 Swarm plot depicting per - read average methylation frequency of CDR and non CDR reads in HG002 T2T-X
+https://github.com/miramastoras/CDR_detect/blob/main/pics/CDR_swarm.png
 
 ![swarm plot](pics/CDR_swarm.png)
 
