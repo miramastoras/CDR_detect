@@ -6,7 +6,7 @@ workflow runCDRdetect{
         File patHORBed
         File secPhaseHifiBam
         String sampleName
-        Array[File] primroseBams
+        File mappedPrimroseBam
     }
 
     call getHORReads{
@@ -15,7 +15,7 @@ workflow runCDRdetect{
             patHORBed=patHORBed,
             secPhaseHifiBam=secPhaseHifiBam,
             sampleName=sampleName,
-            primroseBams=primroseBams
+            mappedPrimroseBam=mappedPrimroseBam
     }
 
     call CDRdetect{
@@ -45,7 +45,7 @@ task getHORReads{
         File patHORBed
         File secPhaseHifiBam
         String sampleName
-        Array[File] primroseBams
+        File mappedPrimroseBam
 
         String dockerImage = "miramastoras/cdr_detect:latest"
         Int memSizeGB = 24
@@ -65,11 +65,7 @@ task getHORReads{
         samtools view --threads ~{threads} ~{sampleName}_hifi_diploid_HOR.srt.bam | cut -f1 > ~{sampleName}_HOR.readnames.txt
 
         # pull HOR readnames from primrose data
-
-        samtools cat ~{sep=" " primroseBams} -o ~{sampleName}_hifi_primrose.bam
-        samtools view --threads ~{threads} -H ~{sampleName}_hifi_primrose.bam > ~{sampleName}_hifi_primrose_HOR.bam
-        samtools view --threads ~{threads} ~{sampleName}_hifi_primrose.bam | fgrep -w -f ~{sampleName}_HOR.readnames.txt >> ~{sampleName}_hifi_primrose_HOR.bam
-
+        python3 /opt/CDR_detect/scripts/extract_reads.py -b ~{mappedPrimroseBam} -n ~{sampleName}_HOR.readnames.txt -o ~{sampleName}_hifi_primrose_HOR.bam
         samtools sort --threads ~{threads} ~{sampleName}_hifi_primrose_HOR.bam > ~{sampleName}_hifi_primrose_HOR.srt.bam
         samtools index --threads ~{threads} ~{sampleName}_hifi_primrose_HOR.srt.bam
     >>>
