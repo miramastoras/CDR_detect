@@ -126,6 +126,7 @@ task CDRdetect{
 task formatResults{
     input{
         File hifiHORBam
+        File hifiHORBai
         File CDRReadnames
         File dipHORBed
         File primroseHORBam
