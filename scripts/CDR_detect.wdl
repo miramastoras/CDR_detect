@@ -21,15 +21,18 @@ workflow runCDRdetect{
     call CDRdetect{
         input:
             primroseHORBam=getHORReads.primroseHORBam,
+            primroseHORBai=getHORReads.primroseHORBai,
             sampleName=sampleName
     }
 
     call formatResults{
         input:
             primroseHORBam=getHORReads.primroseHORBam,
+            primroseHORBai=getHORReads.primroseHORBai,
             CDRReadnames=CDRdetect.CDRReadnames,
             sampleName=sampleName,
             hifiHORBam=getHORReads.hifiHORBam,
+            hifiHORBai=getHORReads.hifiHORBai,
             dipHORBed=getHORReads.dipHORBed
     }
 
@@ -62,6 +65,7 @@ task getHORReads{
         cat ~{matHORBed} ~{patHORBed} | bedtools sort -i stdin > ~{sampleName}_AS_HOR_dip.srt.bed
         bedtools intersect -abam ~{secPhaseHifiBam} -b ~{sampleName}_AS_HOR_dip.srt.bed -wa > ~{sampleName}_hifi_diploid_HOR.bam
         samtools sort --threads ~{threads} ~{sampleName}_hifi_diploid_HOR.bam > ~{sampleName}_hifi_diploid_HOR.srt.bam
+        samtools index -@ ~{threads} ~{sampleName}_hifi_diploid_HOR.srt.bam
         samtools view --threads ~{threads} ~{sampleName}_hifi_diploid_HOR.srt.bam | cut -f1 > ~{sampleName}_HOR.readnames.txt
 
         # pull HOR readnames from primrose data
@@ -72,6 +76,7 @@ task getHORReads{
     output{
         File dipHORBed = "~{sampleName}_AS_HOR_dip.srt.bed"
         File hifiHORBam = "~{sampleName}_hifi_diploid_HOR.srt.bam"
+        File hifiHORBai = "~{sampleName}_hifi_diploid_HOR.srt.bam.bai"
         File primroseHORBam = "~{sampleName}_hifi_primrose_HOR.srt.bam"
         File primroseHORBai = "~{sampleName}_hifi_primrose_HOR.srt.bam.bai"
     }
@@ -86,6 +91,7 @@ task getHORReads{
 task CDRdetect{
     input{
         File primroseHORBam
+        File primroseHORBai
         String sampleName
 
         String windowSize=3000
@@ -123,6 +129,7 @@ task formatResults{
         File CDRReadnames
         File dipHORBed
         File primroseHORBam
+        File primroseHORBai
         String sampleName
 
         String dockerImage = "miramastoras/cdr_detect:latest"
