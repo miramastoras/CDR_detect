@@ -110,7 +110,7 @@ task CDRdetect{
         set -u
         set -o xtrace
 
-        CDR_detect.py -w ~{windowSize} -t ~{readThresh} -x ~{windowThresh} -i ~{stepSize} -b ~{primroseHORBam} -o ~{sampleName}_CDR
+        CDR_detect.py -w ~{windowSize} -t ~{readThresh} -x ~{windowThresh} -i ~{stepSize} -b ~{primroseHORBam} -o ~{sampleName}
     >>>
     output{
         File CDRReadnames="~{sampleName}_CDR.txt"
