@@ -189,6 +189,7 @@ def find_cdr_candidates(bamfile, w,x,o,t ):
     parse_tag_time=0
     is_read_CDR_time=0
     empty = 0
+    parsetime=0
     for read in bamfile.fetch():  # specify bamfile.fetch(contig=ref, start=pos_start, stop=pos_stop) for specific regions
         #t0=time.time()
         # later, subset reads by quality?
