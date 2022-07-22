@@ -4,7 +4,9 @@ This markdown contains the analyses done for the CDR publication in benchmarking
 
 Table of Contents:
 1. [Quantifying CDRs in CHM13 and HG002-t2tX for benchmarking ](##1-quantifying-cdrs-in-chm13-and-hg002-t2tx-for-benchmarking)
-
+2. [Benchmark CDR_detect performance in HG002 t2t-X ](##2-benchmark-cDR-detect-performance-in-hG002-t2t-X)
+3. [Run CDR_detect across HPRC individuals hifi data](##3-run-cDR-detect-across-hPRC-individuals-hifi-data)
+4. [Expand CDR_detect to ONT data](##4-expand-cDR-detect-to-oNT-data)
 
 ## 1. Quantifying CDRs in CHM13 and HG002-t2tX for benchmarking
 
@@ -392,5 +394,13 @@ docker run -it -v /scratch/mira:/scratch/mira -v /scratch/mira/cromwell-executio
 /data/mira/CDR_detect/test/CDR_detect/scripts/CDR_detect.py -b /scratch/mira/cromwell-executions/runCDRdetect/e97ef395-1055-48f3-8aed-82d42893a50c/call-getHORReads/execution/HG01243_hifi_primrose_HOR.bam -o /scratch/mira/test/cdr_detect_test_unsort
 
 /data/mira/CDR_detect/test/CDR_detect/scripts/CDR_detect.py -b /scratch/mira/HG01243_primrose/hifi_cat_test.bam -o /scratch/mira/test/cdr_detect_test_unsort
+
+samtools merge --threads 50 merge_attempt.bam m64136_200827_191603.hifi_reads.bam m64136_200829_012933.hifi_reads.bam m64136_200830_075556.hifi_reads.bam
+samtools sort merge_attempt.bam > merge_attempt.srt.bam
+samtools view -H merge_attempt.srt.bam > merge_attempt.srt.HOR.sam
+samtools view --threads 50 merge_attempt.srt.bam | fgrep -w -f /scratch/mira/cromwell-executions/runCDRdetect/e97ef395-1055-48f3-8aed-82d42893a50c/call-getHORReads/execution/HG01243_HOR.readnames.txt >> merge_attempt.srt.HOR.sam
+samtools view --threads 60 -b -h merge_attempt.srt.HOR.sam > merge_attempt.srt.HOR.bam
+
+python3 /data/mira/CDR_detect/test/CDR_detect/scripts/CDR_detect.py -b /scratch/mira/HG01243_primrose/m64136_200827_191603.hifi_reads.bam -o /scratch/mira/HG01243_primrose/cdr_test_merge_srt
 ```
 ## 4. Expand CDR_detect to ONT data
