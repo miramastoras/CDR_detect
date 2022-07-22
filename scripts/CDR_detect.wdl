@@ -67,7 +67,7 @@ task getHORReads{
         # pull HOR readnames from primrose data
         python3 /opt/CDR_detect/scripts/extract_reads.py -b ~{mappedPrimroseBam} -n ~{sampleName}_HOR.readnames.txt -o ~{sampleName}_hifi_primrose_HOR.bam
         samtools sort --threads ~{threads} ~{sampleName}_hifi_primrose_HOR.bam > ~{sampleName}_hifi_primrose_HOR.srt.bam
-        samtools index --threads ~{threads} ~{sampleName}_hifi_primrose_HOR.srt.bam
+        samtools index -@ ~{threads} ~{sampleName}_hifi_primrose_HOR.srt.bam
     >>>
     output{
         File dipHORBed = "~{sampleName}_AS_HOR_dip.srt.bed"
@@ -139,7 +139,7 @@ task formatResults{
         # get locations & annotations for each read
         samtools view --threads ~{threads} ~{hifiHORBam} | fgrep -w -f ~{CDRReadnames} >> ~{sampleName}_hifi_CDRs.bam
         samtools sort --threads ~{threads} ~{sampleName}_hifi_CDRs.bam > ~{sampleName}_hifi_CDRs.srt.bam
-        samtools index --threads ~{threads} ~{sampleName}_hifi_CDRs.srt.bam
+        samtools index -@ ~{threads} ~{sampleName}_hifi_CDRs.srt.bam
 
         samtools view --threads ~{threads} ~{sampleName}_hifi_CDRs.srt.bam | awk '{print $3"\t"$4"\t"$4+length($10)"\t"$1}' > ~{sampleName}_hifi_diploid_CDRreads.bed
         bedtools map -a ~{sampleName}_hifi_diploid_CDRreads.bed -b ~{dipHORBed} -c 4 -o collapse > ~{sampleName}_hifi_diploid_CDRreads_HUMAS_HMMER_annotations.txt
