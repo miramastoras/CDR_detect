@@ -110,10 +110,10 @@ task CDRdetect{
         set -u
         set -o xtrace
 
-        CDR_detect.py -w ~{windowSize} -t ~{readThresh} -x ~{windowThresh} -i ~{stepSize} -b ~{primroseHORBam} -o ~{sampleName}_CDR_readnames.txt
+        CDR_detect.py -w ~{windowSize} -t ~{readThresh} -x ~{windowThresh} -i ~{stepSize} -b ~{primroseHORBam} -o ~{sampleName}_CDR
     >>>
     output{
-        File CDRReadnames="~{sampleName}_CDR_readnames.txt"
+        File CDRReadnames="~{sampleName}_CDR.txt"
     }
     runtime {
         memory: memSizeGB + " GB"
