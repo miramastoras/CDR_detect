@@ -145,7 +145,7 @@ task formatResults{
         set -o xtrace
 
         # get locations & annotations for each read
-        samtools view --threads ~{threads} ~{hifiHORBam} | fgrep -w -f ~{CDRReadnames} >> ~{sampleName}_hifi_CDRs.bam
+        python3 /opt/CDR_detect/scripts/extract_reads.py -b ~{hifiHORBam} -n ~{CDRReadnames} -o ~{sampleName}_hifi_CDRs.bam
         samtools sort --threads ~{threads} ~{sampleName}_hifi_CDRs.bam > ~{sampleName}_hifi_CDRs.srt.bam
         samtools index -@ ~{threads} ~{sampleName}_hifi_CDRs.srt.bam
 
@@ -153,7 +153,7 @@ task formatResults{
         bedtools map -a ~{sampleName}_hifi_diploid_CDRreads.bed -b ~{dipHORBed} -c 4 -o collapse > ~{sampleName}_hifi_diploid_CDRreads_HUMAS_HMMER_annotations.txt
 
         # get fastq sequence using primrose data
-        samtools view --threads ~{threads} ~{primroseHORBam} | fgrep -w -f ~{CDRReadnames} >> ~{sampleName}_primrose_CDRs.bam
+        python3 /opt/CDR_detect/scripts/extract_reads.py -b ~{primroseHORBam} -n ~{CDRReadnames} -o ~{sampleName}_primrose_CDRs.bam
         bedtools bamtofastq -i ~{sampleName}_primrose_CDRs.bam -fq ~{sampleName}_CDRs.fastq
         gzip ~{sampleName}_CDRs.fastq
 
