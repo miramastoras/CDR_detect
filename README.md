@@ -19,7 +19,6 @@ Requirements:
 - pysam
 - numpy
 - Bio.seq
-- argparse
 ```
 
 Command:
