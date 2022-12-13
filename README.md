@@ -14,7 +14,7 @@ Detecting CDRs in long reads with methylation tags
 
 ## How to run CDR_detect.py
 
-Requirements:
+Python libraries needed:
 ```
 - pysam
 - numpy
