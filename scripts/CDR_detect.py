@@ -3,9 +3,7 @@
 '''
 Purpose: Find coordinates of predicted CDRs relative to each read
 Author: Mira Mastoras, mmastora@ucsc.edu
-Usage: python3 CDR_detect.py -b bamfile -o outfile_prefix
-
-python3 CDR_detect.py -b /Users/miramastoras/Desktop/IGV_files/S3CXH1L.hg002_t2tX.srt.bam -o /Users/miramastoras/Desktop/S3CXH1L.hg002_t2tX.CDR_detect_coords.txt
+Usage: python3 CDR_detect.py -b bamfile -o outfile -w <windowsize> -x <methylation threshold> -n <minimum CDR size>
 '''
 
 import argparse
@@ -125,12 +123,13 @@ def calc_avg_methyl(read,modCs):
 
 def is_read_CDR(read,modCs,w, x, n):
     '''
+    Find CDR candidates in a read
     :param: read: AlignedSegment object representing the read
     :param: modCs: 0-based list of indeces of all methylated C sites in the read
-    :param: w:  window size as percent of read length
-    :j: number of previous windows to compare to
-    :x: percent change from current read to number of previous windows to use as threshold
-    :return: a boolean determining whether read is a candidate for containing a CDR or not
+    :param: w:  window size to move across read and check for CDRs
+    :x: percent methylation below which a window is a CDR
+    :n: minimum CDR size to report
+    :return: list of lists containing CDR coordinates [start,end]
     '''
     t0=time.time()
 
@@ -141,41 +140,49 @@ def is_read_CDR(read,modCs,w, x, n):
     # create list to hold all CDR coordinates
     CDR_coords=[]
     currCDR=[] # list to collect start and end for current CDR
-    # loop through sliding window, in windows with overlap size defined by o
+    # Move across read in sliding window of size w by 1 bp
     for i in range(0,readlength - w + 1, 1):
+
         # get all CpG sites in window and all mod CpG sites in window
         allCpGsright=bisect.bisect_left(totalCpGs,i+w)
-        allCpGsleft=bisect.bisect_left(totalCpGs,i) # come back to this, should we add 1?
+        allCpGsleft=bisect.bisect_left(totalCpGs,i)
 
         if allCpGsright == allCpGsleft: # this means there are no CpG sites in the current window
             continue
 
         modCsright=bisect.bisect_left(modCs,i+w)
-        modCsleft=bisect.bisect_left(modCs,i) # come back to this, should we add 1?
+        modCsleft=bisect.bisect_left(modCs,i)
 
+        # get all Cs and modified Cs in current window
         allCs_inside=totalCpGs[allCpGsleft:allCpGsright]
         modCs_inside=totalCpGs[modCsleft:modCsright]
 
+        # methylation frequency is # modified Cs / all CpGs in window
         freq = len(modCs_inside) / len(allCs_inside)
 
-        # if curr methylation is < x, record window start and end coord
-
+        # if curr methylation drops below x, then we record the current start and end coordinate as the coords of the CDR
         if len(currCDR) == 0:  # if list is empty, we're looking for a start coordinate
             if freq < x:
                 currCDR.append(i)
-        else: # we've recorded a start coord, now we're looking for an end coordinate
-            if (freq >= x) or (i+w == readlength): # append end coord if cdr dip ends or we hit end of read
+        else: # we've recorded CDR start coord, now we're looking for an end coordinate
+            if (freq >= x) or (i+w == readlength): # append end coord if cdr ends or we hit end of read
                 currCDR.append(i+w)
 
         if len(currCDR) == 2: # if we've recorded a start and end, we've come out of a methylation dip
             if currCDR[1] - currCDR[0] >= n: # only report dips > n base pairs in size
                 CDR_coords.append(currCDR)
             currCDR=[]
+
     return CDR_coords, time.time() - t0
 
 def find_cdr_candidates(bamfile, w,x,n ):
     '''
-
+    Loop through all reads and find their CDR candidates
+    :param: bamfile: pysam object
+    :param: w:  window size to move across read and check for CDRs
+    :x: percent methylation below which a window is a CDR
+    :n: minimum CDR size to report
+    :return: list of lists containing CDR coordinates [start,end]
     '''
     CDRs=[]
 
@@ -183,17 +190,15 @@ def find_cdr_candidates(bamfile, w,x,n ):
     is_read_CDR_time=0
     empty = 0
     parsetime=0
-    for read in bamfile.fetch():  # specify bamfile.fetch(contig=ref, start=pos_start, stop=pos_stop) for specific regions
-        #t0=time.time()
-        # later, subset reads by quality?
+    for read in bamfile.fetch():
         # get methyl tags
         if read.has_tag('Mm') and read.has_tag('Ml'):
             # if methyl tag is there but empty, skip
             if len(read.get_tag('Mm')) == 0:
                 empty+=1
                 continue
-            # deal with number of methyl tags being super low compared to number of Cs in read
-            # output another file for reads with empty methyl tags
+            # need to deal with number of methyl tags being super low compared to number of Cs in read
+            # need to output another file for reads with empty methyl tags
 
             # parse mm and ml tag, get list of indeces of all C bases, and indeces of all C mod bases
             allCs,modCs, parsetime = parse_tag(read)
@@ -203,10 +208,9 @@ def find_cdr_candidates(bamfile, w,x,n ):
             is_read_CDR_time+=CDRtime
             # append to CDR or non CDR list based on CDR bool
             if len(CDRcoords) > 0:
-                CDRs.append([read.query_name, CDRcoords])
+                CDRs.append([read, CDRcoords])
         else:
             empty+=1
-        #print('\n','processed read ',read.query_name,'in ',' %.3f' % (time.time() - t0), file=sys.stderr)
 
     print("w:", w, "x:", x, "n: ",n)
     print("time in parsing bam tag: ", parsetime,"seconds")
@@ -215,12 +219,25 @@ def find_cdr_candidates(bamfile, w,x,n ):
 
     return CDRs
 
+def get_CDR_fastas(CDRs):
+    '''
+    param CDRs: list in the format [ pysam read object, [[start,end]]] reads containing CDRs and their positions in the read
+    return: return fa sequences in the predicted CDRs from the reads
+    '''
+    # unfinished function
+    for read in CDRs:
+        # get sequence of read
+        seq = Seq(read[0].seq)
+        if read[0].is_reverse:
+            seq = seq.reverse_complement()
+        print(seq)
+
+        for coords in read[1]:
+            subseq = seq[coords[0]:coords[1]]
+            rec = SeqRecord(seq, read[0].query_name, "", "")
+        break
+
 def main():
-    '''
-    args.w windowsize in percent of read length
-    args.j number of previous windows to consider in deciding on CDR candidacy
-    args.x percent change of current window to previous j windows
-    '''
     # parse command line arguments
     t0 = time.time()
     args = arg_parser()
@@ -234,7 +251,6 @@ def main():
     x = 0.3 # threshold for methylation in window
     n = 3000 # minimum CDR size to qualify as a CDR
 
-
     # use command line parameters if they are provided
     if args.windowsize is not None:
         w=int(args.windowsize)
@@ -242,18 +258,17 @@ def main():
         x=float(args.window_threshold)
     if args.minimum_bp_num is not None:
         n=float(args.window_number)
-    # separate cdr candidates from noncdr candidates
+
+    # CDRs holds a list where each entry is [pysam read object, [[start, end]] where start and end are positions of CDRs in read
     CDRs =find_cdr_candidates(bamfile, w, x, n)
 
     # write output text files
-    with open(args.out+"_CDR.txt",'w') as out:
+    with open(args.out,'w') as out:
         for read in CDRs:
-            print(read[0], read[1], sep="\t", file=out)
+            print(read[0].query_name, read[1], sep="\t", file=out)
 
     bamfile.close()
     print('\n', 'total time for the program %.3f' % (time.time() - t0), file=sys.stderr)
 
 if __name__ == '__main__':
     main()
-
-#

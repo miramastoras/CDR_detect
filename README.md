@@ -1,5 +1,15 @@
 # CDR_detect
-Contains methods for detecting CDRs in methyl-tagged long read data
+Detecting CDRs in long reads with methylation tags
+
+```
+|__ scripts
+    |__ CDR_detect_reads.py returns readnames that contain potential CDR (older version)
+    |__ CDR_detect.py returns readnames and coordinates of CDR in the read
+    |__ CDR_detect.wdl wdl workflow for hprc assemblies
+    |__ evaluate_CDR_detect.py calculates P,R,F1 against input truth CDR reads
+|__ conference_summary.md summary of project July 2022
+|__ CDR_detect_notes.md 
+```
 
 ## How to run CDR_detect.py
 
@@ -13,13 +23,21 @@ Requirements:
 
 Command:
 ```
-
+python3 CDR_detect.py -b bamfile -o outfile -w <windowsize> -x <methylation threshold> -n <minimum CDR size>
 ```
 
+Inputs:
+- `-b` (required) bamfile of reads from the alpha satellite HOR regions. These reads have methylation tags giving the percent likelihood of methylation at each CpG site on the read
+- `-o` (required) output text file name
+- `-w` (default = 1000 bp) Window size of CDRs to consider in bp
+- `-x` (default = 0.3) methylation frequency threshold for calling a CDR in a window
+- `-n` (default = 3000 bp) minimum CDR size in bp
+
+
 Description of method:
-- takes in bamfile of reads aligning to the HOR regions
-- these reads have methylation tags giving the percent likelihood of methylation at each CpG site on the read
-- First, we calculate the average methylation probability across the whole read. If it is < 40%, we automatically call that read a CDR and move on
-- For the other reads, we move in a sliding window across each read, by 1 bp. Optimal window size right now is 3000bp
-- for each window, we take the average of the methylation probabilities in that window. If any window drops below 30%, we exit and call that read a CDR
-- 
+
+- For each read, move in a sliding window of size w by 1 bp
+- Calculate methylation frequency in that window
+- If the methylation frequency drops below x, record current window start coordinate as start coordinate of a CDR
+- Once the methylation frequency rises above x, record current window end coordinate as end coordinate of CDR
+- Return readnames and the coordinates of predicted CDRs inside them. Only return CDRs > n
