@@ -37,8 +37,8 @@ Inputs:
 
 Description of method:
 
-- For each read, move in a sliding window of size w by 1 bp
+- For each read, move in a sliding window of size `w` by 1 bp
 - Calculate methylation frequency in that window
-- If the methylation frequency drops below x, record current window start coordinate as start coordinate of a CDR
-- Once the methylation frequency rises above x, record current window end coordinate as end coordinate of CDR
-- Return readnames and the coordinates of predicted CDRs inside them. Only return CDRs > n
+- If the methylation frequency drops below `x`, record current window start coordinate as start coordinate of a CDR
+- Once the methylation frequency rises above `x`, record current window end coordinate as end coordinate of CDR
+- Return readnames and the coordinates of predicted CDRs inside them. Only return CDRs > `n`
