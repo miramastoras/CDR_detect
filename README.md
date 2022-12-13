@@ -4,9 +4,10 @@ Detecting CDRs in long reads with methylation tags
 ```
 |__ scripts
     |__ CDR_detect_reads.py returns readnames that contain potential CDR (older version)
-    |__ CDR_detect.py returns readnames and coordinates of CDR in the read
-    |__ CDR_detect.wdl wdl workflow for hprc assemblies
+    |__ CDR_detect.py returns readnames and coordinates of CDR in the reads
     |__ evaluate_CDR_detect.py calculates P,R,F1 against input truth CDR reads
+    |__ CDR_detect.wdl wdl workflow for hprc assemblies
+    |__ Dockerfile used for docker in CDR_detect.wdl
 |__ conference_summary.md summary of project July 2022
 |__ CDR_detect_notes.md 
 ```
