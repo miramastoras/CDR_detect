@@ -1,6 +1,6 @@
 # CDR detect analyses
 
-This markdown contains the analyses done for the CDR paper in benchmarking CDR_detect.py and applying it to the HPRC data
+This markdown contains exploratory analysis for detecting CDRs with a simple reference free approach. CDRs are regions of hypomethylation amongst regions of hypermethylation in highly repetitive alpha arrays. They have been associated with the sites of cenpA binding and kinetochore attachment. 
 
 Table of Contents:
 1. [Quantifying CDRs in CHM13 and HG002-t2tX for benchmarking ](##1-quantifying-cdrs-in-chm13-and-hg002-t2tx-for-benchmarking)
@@ -61,7 +61,7 @@ Although the dips are sharper with method 1, we will still have the same regions
 
 ### 1.2 Choosing a strict and a lenient quantitative definition for a CDR
 
-CDRs are regions of hypomethylation amongst regions of hypermethylation in highly repetitive alpha arrays. They have been associated with the sites of cenpA binding and kinetochore attachment. However, it is not known what the minimum size of a CDR is for cenpa to bind it. In the HG002 chrX array for example, when we look on the scale of the whole array, the 5 previously identified  CDR dips are clear to see.
+It is not known what the minimum size of a CDR is for cenpa to bind it. In the HG002 chrX array for example, when we look on the scale of the whole array, the 5 previously identified  CDR dips are clear to see.
 
 ![whole x array](pics/whole_array_x.png)
 

@@ -9,7 +9,7 @@ Detecting CDRs in long reads with methylation tags
     |__ CDR_detect.wdl wdl workflow for hprc assemblies
     |__ Dockerfile used for docker in CDR_detect.wdl
 |__ conference_summary.md summary of project July 2022
-|__ CDR_detect_notes.md 
+|__ CDR_detect_notes.md
 ```
 
 ## How to run CDR_detect.py
@@ -36,8 +36,8 @@ Inputs:
 
 Description of method:
 
-- For each read, move in a sliding window of size `w` by 1 bp
+- For each read, move forward in a sliding window of size `w` by 1 bp
 - Calculate methylation frequency in that window
 - If the methylation frequency drops below `x`, record current window start coordinate as start coordinate of a CDR
 - Once the methylation frequency rises above `x`, record current window end coordinate as end coordinate of CDR
-- Return readnames and the coordinates of predicted CDRs inside them. Only return CDRs > `n`
+- Return readnames and the coordinates of predicted CDRs inside them. Only return CDRs > `n` (size in bp)
