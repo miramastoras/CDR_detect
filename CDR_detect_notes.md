@@ -1,6 +1,6 @@
-# CDR detect analyses
+# CDR detect analysis
 
-This markdown contains exploratory analysis for detecting CDRs with a simple reference free approach. CDRs are regions of hypomethylation amongst regions of hypermethylation in highly repetitive alpha arrays. They have been associated with the sites of cenpA binding and kinetochore attachment. 
+This markdown contains exploratory analysis for detecting CDRs with a simple reference free approach. CDRs are regions of hypomethylation amongst regions of hypermethylation in highly repetitive alpha arrays. They have been associated with the sites of cenpA binding and kinetochore attachment.
 
 Table of Contents:
 1. [Quantifying CDRs in CHM13 and HG002-t2tX for benchmarking ](##1-quantifying-cdrs-in-chm13-and-hg002-t2tx-for-benchmarking)
